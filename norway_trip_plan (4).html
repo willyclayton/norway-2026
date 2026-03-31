@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norway 2026 — Trip Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<style>
+:root{--bg:#FAFAF7;--card:#FFF;--text:#1A1A1A;--muted:#6B6B6B;--border:#E5E3DD;--accent:#1B5E4B;--accent-lt:#E8F3EF;--warm:#C4621A;--warm-lt:#FDF3EB;--blue:#1A5276;--blue-lt:#EBF2F7;--red:#922B21;--red-lt:#FBEAE8;--purple:#5B3A8C;--purple-lt:#F2EDF8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.c{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{text-align:center;padding:48px 0 32px;border-bottom:1px solid var(--border);margin-bottom:32px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;letter-spacing:-.5px;margin-bottom:6px}
+.hero p{color:var(--muted);font-size:.95rem}
+.badge{display:inline-block;margin-top:14px;background:var(--accent-lt);color:var(--accent);font-weight:500;padding:5px 14px;border-radius:20px;font-size:.82rem}
+#map{width:100%;height:420px;border-radius:12px;border:1px solid var(--border);margin-bottom:32px}
+.leaflet-popup-content-wrapper{border-radius:8px!important;font-family:'DM Sans',sans-serif}
+.leaflet-popup-content{margin:10px 14px!important;font-size:13px;line-height:1.5}
+.popup-day{font-weight:700;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.popup-title{font-weight:700;font-size:14px;margin:2px 0}
+.popup-desc{color:var(--muted);font-size:12px}
+.sec{margin-bottom:36px}
+.sec-t{font-family:'DM Serif Display',serif;font-size:1.4rem;font-weight:400;margin-bottom:4px}
+.sec-s{color:var(--muted);font-size:.83rem;margin-bottom:16px}
+.flight{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin-bottom:28px}
+.flight .label{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin-bottom:10px}
+.fl-row{padding:6px 0;font-size:.88rem}.fl-row+.fl-row{border-top:1px solid var(--border);padding-top:10px;margin-top:6px}
+.fl-route{font-weight:600}.fl-detail{color:var(--muted);font-size:.82rem}
+.fl-price{text-align:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.fl-price .big{font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--accent)}
+.fl-price .sub{font-size:.78rem;color:var(--muted);margin-top:2px}.fl-price a{color:var(--blue)}
+.iday{display:flex;gap:14px;padding:12px 4px;border-bottom:1px solid var(--border)}
+.iday:last-child{border-bottom:none}
+.inum{min-width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;flex-shrink:0;cursor:pointer}
+.nc{background:var(--accent-lt);color:var(--accent)}.nt{background:var(--blue-lt);color:var(--blue)}.nh{background:var(--warm-lt);color:var(--warm)}.nr{background:var(--red-lt);color:var(--red)}.np{background:var(--purple-lt);color:var(--purple)}
+.ibody{flex:1}.idate{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}.ititle{font-weight:700;font-size:.92rem;margin:1px 0}.idesc{font-size:.82rem;color:var(--muted)}
+.itag{display:inline-block;font-size:.68rem;font-weight:600;padding:2px 7px;border-radius:6px;margin-top:4px}
+.tt{background:var(--blue-lt);color:var(--blue)}.th2{background:var(--warm-lt);color:var(--warm)}.tr{background:var(--accent-lt);color:var(--accent)}.tf{background:var(--purple-lt);color:var(--purple)}
+
+/* Photo dropdown */
+.photo-drop{margin-top:8px}
+.photo-drop summary{font-size:.78rem;color:var(--blue);cursor:pointer;font-weight:500;user-select:none;padding:4px 0}
+.photo-drop summary:hover{text-decoration:underline}
+.photo-drop[open] summary{margin-bottom:8px}
+.photo-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.photo-scroll::-webkit-scrollbar{height:6px}
+.photo-scroll::-webkit-scrollbar-track{background:var(--border);border-radius:3px}
+.photo-scroll::-webkit-scrollbar-thumb{background:var(--muted);border-radius:3px}
+.photo-scroll img{height:180px;width:auto;border-radius:8px;object-fit:cover;flex-shrink:0;scroll-snap-align:start;border:1px solid var(--border)}
+
+/* Booking, budget, links, notes — same as before */
+.tbox{background:var(--blue-lt);border:1px solid #C5D9E8;border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.tbox .tn{font-weight:700;font-size:.9rem;color:var(--blue)}.tbox .td{font-size:.82rem;color:var(--muted);margin-top:2px}
+.tbox a{font-size:.78rem;color:var(--blue);text-decoration:none;margin-right:10px;font-weight:500}
+.bk{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px}
+.bk.u{border-left:3px solid var(--red)}.bk.s{border-left:3px solid var(--warm)}.bk.l{border-left:3px solid var(--accent)}
+.bk-h{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
+.bk-n{font-weight:700;font-size:.9rem}
+.bk-w{font-size:.68rem;text-transform:uppercase;letter-spacing:.7px;font-weight:700;padding:2px 8px;border-radius:6px}
+.wn{background:var(--red-lt);color:var(--red)}.wm{background:var(--warm-lt);color:var(--warm)}.wj{background:var(--accent-lt);color:var(--accent)}
+.bk-d{font-size:.82rem;color:var(--muted);margin-top:4px}.bk-p{font-size:.78rem;color:var(--muted);margin-top:3px}
+.pt{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 7px;border-radius:5px;margin-right:3px}
+.pp{background:var(--blue-lt);color:var(--blue)}.ptot{background:var(--accent-lt);color:var(--accent)}.psh{background:var(--purple-lt);color:var(--purple)}
+.bk-l{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px}
+.bk-l a{font-size:.78rem;color:var(--blue);text-decoration:none;padding:2px 8px;background:var(--blue-lt);border-radius:5px;font-weight:500}
+.bk-l a:hover{text-decoration:underline}
+.bt{width:100%;border-collapse:collapse;font-size:.85rem}
+.bt th{text-align:left;font-weight:600;padding:8px 6px;border-bottom:2px solid var(--text);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.bt th:nth-child(2),.bt th:nth-child(3){text-align:right}
+.bt td{padding:9px 6px;border-bottom:1px solid var(--border)}.bt td:nth-child(2),.bt td:nth-child(3){text-align:right;font-variant-numeric:tabular-nums}
+.bt .cat{color:var(--muted);font-size:.75rem;display:block;font-weight:400}
+.bt .tot td{border-top:2px solid var(--text);border-bottom:none;font-weight:700;font-size:.95rem;padding-top:12px}
+.bt .sav td{border-bottom:none;color:var(--accent);font-weight:600;font-size:.82rem}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;text-decoration:none;color:var(--text);transition:border-color .2s}
+.lc:hover{border-color:var(--accent)}.lc-t{font-weight:600;font-size:.82rem}.lc-d{font-size:.72rem;color:var(--muted)}
+.note{border-radius:10px;padding:14px 18px;font-size:.82rem;line-height:1.7;margin-top:16px}
+.note-w{background:var(--warm-lt);color:var(--warm)}.note-g{background:var(--accent-lt);color:var(--accent)}
+.note strong{display:block;margin-bottom:3px}
+.ng{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:6px;font-size:.8rem}
+.ng-i{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)}.ng-c{font-weight:500}.ng-d{color:var(--muted)}
+@media(max-width:600px){.hero h1{font-size:1.8rem}.lg,.ng{grid-template-columns:1fr}#map{height:320px}.photo-scroll img{height:140px}}
+</style>
+</head>
+<body>
+<div class="c">
+
+<div class="hero">
+<h1>Norway 2026</h1>
+<p>West Norway circuit &middot; 4 scenic railways &middot; 2 epic hikes &middot; DNT glacier stay &middot; 2 travelers</p>
+<div class="badge">Aug 14 – Aug 24 &middot; 11 days &middot; Chicago &#8596; Oslo</div>
+</div>
+
+<div id="map"></div>
+
+<div class="flight">
+<div class="label">Flights — book now</div>
+<div class="fl-row"><div class="fl-route">Thu Aug 13 → Fri Aug 14</div><div class="fl-detail">ORD 4:20 PM → OSL 11:05 AM &middot; KLM via AMS &middot; 11h 45m</div></div>
+<div class="fl-row"><div class="fl-route">Mon Aug 24</div><div class="fl-detail">OSL 9:20 AM → ORD 2:30 PM &middot; KLM via AMS &middot; 12h 10m</div></div>
+<div class="fl-price"><div class="big">$1,476 total</div><div class="sub">$738 pp × 2 &middot; <a href="https://www.google.com/travel/flights">Google Flights</a> &middot; <a href="https://www.klm.com">KLM.com</a></div></div>
+</div>
+
+<div class="sec">
+<div class="sec-t">Day-by-day</div>
+<div class="sec-s">Click a day number to see it on the map &middot; expand 📷 for photos</div>
+<div class="iday" onclick="flyTo(0)">
+<div class="inum nc">1</div>
+<div class="ibody">
+<div class="idate">Fri Aug 14</div>
+<div class="ititle">Arrive Oslo</div>
+<div class="idesc">Land 11:05 AM. Flytoget to city (20 min). Vigeland Park, Karl Johans gate, grocery shop Rema 1000. Pick up DNT key at Youngstorget office.</div>
+<div><span class="itag tr">Easy day</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHjUbINTgYz83gjcyW2hSyHontdZEMqLb-_nhDZ0qFjUTaGrm8N2Zjen8uoXKK7QlBmAnQAQL9321Q8m65M7MZLWLFDCoEI05yrIwdz7zgEDXrlltpzbPc7rPSBFPE-0GTs-ttYyuiijbR_ew=s4800-w800-h600" alt="Arrive Oslo" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFC3beggdKKgpULTe3ZCs2r7Fq8PYEsfZB3p_TThoNShGDq_wog8ZNxQfF05kbwtxeUE4TuhDMYle2rikPmFKllR8ueUExOfr7wDrDnyO7ZiqNIJ4seCcaDFEhm7WVMQHpO5E0JrzUYiFVqvA=s4800-w800-h600" alt="Arrive Oslo" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFqhgS2tVvFgT8mufm9pONtb7HDsggRy62RVjuI17GGhlaVXTgdSI6uRjaWpvQt5GJzw9r3haS_IMsda7PKGZwR8QozhkQp-Mm7bbqtjNnKvrTdY8q8WgaBT_uXjW-0aLs70LBSUGg4aOgAeZf7yuuXdQ=s4800-w800-h600" alt="Arrive Oslo" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(1)">
+<div class="inum nt">2</div>
+<div class="ibody">
+<div class="idate">Sat Aug 15</div>
+<div class="ititle">🚂 Bergen Railway → Finse</div>
+<div class="idesc">Morning train Oslo → Finse (~4 hrs). Arrive 1,222m — no roads, population 15. Hike to Hardangerjøkulen glacier (2-3 hrs RT). 3-course dinner, beers at Norway's highest microbrewery.</div>
+<div><span class="itag tt">Scenic railway #1 · DNT stay</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNF6cZGAT8Wjyfif4hAbKLDqhKVYnqWI1hA8OvNXV39KYgpB-5SVL0hZZXJyebnX4zVoaLDPYAfNorzyz43hW9W71fcpe6GjLLGLpL2gVJj7iEmp3MLdVkOL_T8sytzMXkFvH4lCR8EVCzUsMg=s4800-w800-h600" alt="🚂 Bergen Railway → Finse" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNE4HObHB0Pgew-6b_N73V8jV2-r84rdCmF7V7_LKeZwRQRF5KrFFjneE9t--APyxvOuCZpsMD-c99XrLkslqBfpZ7yTtHXNrLVYN-TY95yS4GV4zHc7G0CnD2AhG3knqugxockVUUOV_jeUIqw=s4800-w800-h600" alt="🚂 Bergen Railway → Finse" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHSgzUsdEOsixrgCejGawUJDICMlp5nEGX-mrEPvdTqO8CpVplOSmNzQDBeWpQBeDRaEE_2WYjihkxWiiQPQbFmbFJjKKiyZFlc3dDpOzNtfsRVcBu9ymNc6Uh8WYb3D3SS9rFhJD4xa2_1=s4800-w800-h600" alt="🚂 Bergen Railway → Finse" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEfATfMmNGnc28uj3nic9XWf1WmJtu4Z0KOgXSUHnY48Clc1cZxG4vJt8BIrgmCFl-r-fw8DPlderR_tVTxUjUgRZHyA68fAQo4cufFGMqVpU5i46fgXEVAst27bKAm-eK_FVmEReQAYsQx=s4800-w800-h600" alt="🚂 Bergen Railway → Finse" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(2)">
+<div class="inum nt">3</div>
+<div class="ibody">
+<div class="idate">Sun Aug 16</div>
+<div class="ititle">🚂 Finse → Bergen</div>
+<div class="idesc">Morning lake walk, breakfast buffet. Train to Bergen (~3 hrs). Arrive ~2 PM. Walk Bryggen wharf, ride Fløyen funicular for sunset views.</div>
+<div><span class="itag tt">Scenic railway #1 cont.</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHtAtwYhD6GwvaepEvczl6Dc0LtyjOy53AKT8x5cow1qGWhCrcb3grzyHcnilIvKE6Kf-lzz9Un1dcg8kPdKGntiCAWP8Fo65fAwKvgZlDZaOGZESO--SyeA7fg8qX4ZwqWFfhTAgaQSriSKw=s4800-w800-h600" alt="🚂 Finse → Bergen" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNH5hk6KhKurYUaIkEyivvpLBH88pmwDapDK5Gp4vBn8TuDwXFaW9ZqXFQlFaT6vWe3UrbAKk1PcXiAdpWo3DYs2G3fbc-uKiOJnZsh3CmcEVUL8a4tYbocuSSt6EeDQS2qf-0cIHrPHeBpa=s4800-w800-h600" alt="🚂 Finse → Bergen" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHGzVxtu9lRasGEcewAuhls6fpmxOZABuFrJ2wZ5TH6YRY4cG8Q6d38oECtynslzR6ne7tJxmUbN6VSkqdT2gfnNdpO-MgXl-n71lJdnCnHmPEim_17c84jWN66Vvr_mbDUKMOoiwzhPw1iPQ=s4800-w800-h600" alt="🚂 Finse → Bergen" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(3)">
+<div class="inum np">4</div>
+<div class="ibody">
+<div class="idate">Mon Aug 17</div>
+<div class="ititle">Bergen AM → bus → Stavanger</div>
+<div class="idesc">Fish soup at Pingvinen (skip tourist fish market). Afternoon bus to Stavanger (~5 hrs). Explore Gamle Stavanger + Øvre Holmegate color street.</div>
+<div><span class="itag tf">Bus transit</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFyM4NI_rKhFnqcCK7a2s3YJ1YvhCoAQGoJf5nvCCKpSlhGXubuo_znCL4hqQrh_9EXS5gyFk9JWZnk12-1P2dxevNLg-CDq4qCq304JWrbTv01ekiDLyGYTuVYd6wRgSUW7O2Oi6k8laoac6ZLvSOShQ=s4800-w800-h600" alt="Bergen AM → bus → Stavanger" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNE4vHa150fK-CAMPGmhPt2Upx9cnfkQziX81CCkYzJkYgvtcOLTdp6V6xzk8HS56LUJ3Kh_ucb50zGSBNSQBMRtbMki5cGoaJbJpc9QjMZvM1JrUiB5eg4nZOba-DVNOtSjIqgtbWizMRXfMg=s4800-w800-h600" alt="Bergen AM → bus → Stavanger" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNF86vNr1a2NwEOh5Y78Z79I819Nmn-z-6Q2F_RXBa5ZQzIORTM-u3V09MFnRfbKTUZSxqifyTuFBEM4DzXaIgr_2kefT_aMeEhH2A1rxHbZxIhF2e38s1WojNqxKRc5-tTNNDhCZaHcv7aPFw=s4800-w800-h600" alt="Bergen AM → bus → Stavanger" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFJ5DWLhE4VHfvL5Hpg9t7tfadT_pYUmExhKTZvdxELEZB6-HdtDb9eriasSkXZ5i4xvFwnQSuyPO_mGuAJ6WlwwJx4gpR11i0ItheAZnF8hi-VTqqnXpFNUGp1ZUH3lZXc2AHpHywWbNTh=s4800-w800-h600" alt="Bergen AM → bus → Stavanger" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(4)">
+<div class="inum nh">5</div>
+<div class="ibody">
+<div class="idate">Tue Aug 18</div>
+<div class="ititle">⛰️ Preikestolen (Pulpit Rock)</div>
+<div class="idesc">5:30 AM start. Bus to trailhead. 4-5 hr round trip. 604m cliff over Lysefjord. Pack lunch + 2L water each.</div>
+<div><span class="itag th2">Hike day</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFAWFbBtXXY1CUCJbntfIOz_2KA4gRCtM96KMYqtC3QlYHO2J3tBuzodjXAdUrVEuLZOq9mzjRcy8Sjr3BeLd4ofHzUeMVyHjA1QgcaQz0bJgw41FmXhi0NzK7AkCTAxrqVP1nlu6KZ7QVdCP4=s4800-w540-h437" alt="⛰️ Preikestolen (Pulpit Rock)" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHVjcmvNMWbNav5Ht1hNJdRZoHf1q6Eb1du61dh6Zvx2Iy_5ooUTtJAxK8mkyX5qIcmWIJ4P1vTVx0dawTAj_R59ThS7nSOmKCtsvEKJXxrYt1wvylO79_gsdIpM-p65dHkwKx_xWumDVn5zBc6JGRZ=s4800-w800-h600" alt="⛰️ Preikestolen (Pulpit Rock)" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEMcZi6LqNIFXItqJHuql4t0rvJObuFY2DzYi76vu-n2Wy0Qz4hN-W88aaX2PKKMhil1L5GRTe9A6CP6U12-iD4d6ISCbjA3fNeO4tbMLFgWNxcZeKTe4BHa6bEhdXoSk89f41jmPaep8bLoX8=s4800-w800-h600" alt="⛰️ Preikestolen (Pulpit Rock)" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHD49KR-e3olulO1xZIM57MJIQdum6FPVo8pSkZ_a2M22KqmHAzPl63d1vyNtSv92giglYr0O1d3TsxFCjq6YP98lqy5hDfktQi0nYbjCxc9I7GKnlCiKjuE5cqPWoQIqIjkITbwiAqVfgz=s4800-w800-h600" alt="⛰️ Preikestolen (Pulpit Rock)" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(5)">
+<div class="inum np">6</div>
+<div class="ibody">
+<div class="idate">Wed Aug 19</div>
+<div class="ititle">Bus → Odda · Rest day</div>
+<div class="idesc">Bus Stavanger → Odda (~4-5 hrs). Rest + grocery shop. Optional: Buerbreen Glacier hike (2 hrs RT, almost no tourists).</div>
+<div><span class="itag tr">Recovery day</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFnN0DzsRatLffqDzPuQ73h237hOJi1nvZLmqRg8YJ6EK42WRhlP5bw-SK4Uwod4QVHEpSYjOAK1nJbzhW80an6b7sENbiIqoGi8bcPifqqamq732mGx8TCJ-oZ-mkV49uN3pPo7SMFG-4m=s4800-w800-h600" alt="Bus → Odda · Rest day" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEf24n2BDuY46qmM7r5BAIEx0_ykmCC9tYVuhDNky6S-iPwryywNoq95sNJHvFZQMqjJpjn7pakvEqR_XGKQGTT3L-taDkH27lwKJWGWHZ6H8Kb1rPqEK_OthgaZkvLWt9NUFXZr3sMG-4usA=s4800-w800-h600" alt="Bus → Odda · Rest day" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHSYSABG24BnoMtcclHd_qmjco3VNTuwlPtoiXjvvj5b6UxYb5ayWrBwnLYAtpsZAtVM-vWzBeR9qeeFQ09xgzPxOg-D-RtY4HOTHqDwXl_poaC4npA8-qdk4cVmBjYGf3dCvgoo2R3hVxaJg=s4800-w800-h600" alt="Bus → Odda · Rest day" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(6)">
+<div class="inum nr">7</div>
+<div class="ibody">
+<div class="idate">Thu Aug 20</div>
+<div class="ititle">⛰️ Trolltunga</div>
+<div class="idesc">6 AM start from P3. 7-10 hrs, 20 km round trip. The big one. 3L water each, lunch, extra layers, headlamp. Start early = fewer crowds.</div>
+<div><span class="itag th2">Epic hike</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNE5v__N5PdanQbGpqlZ6_l_WLjAbV7-vlK2rKKG_WrWS50O8AYGGf-mxcTJtpqW3V1zyNPtgvkg27exveind8oIE2ab2j_OAWjYarIS-6KYE2AVRc4wKsUdFoqsWKyxvmtGBO53CaCOtyw7PtM5a5V1=s4800-w800-h600" alt="⛰️ Trolltunga" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEZYmLslZ744z1hOU3ZYGG0HW_UjJFdMVMeNcPg61nO2QTEISdM4nkxdAZWyCADoha6xqzAk1SCkU_BStL40i5nn0-LIwbByyInOyl-pnErQaNJH_nenSZ4vGF8CPcg6pr1dwquU7HfgSDx3w=s4800-w800-h600" alt="⛰️ Trolltunga" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEWDcB2lI_Zx1OEndpte5AyWEPtLNJonpxOFqxw0X6QteA_zvzjQ2MvESr5eZZ2AvmUmaLEjeMb3y-AAOOQgXiK1gJH_JXTEMVTfyr7Os6JihhPrUYF5UaTt0N_jURT7oZs0uFUckD5fblxZGoX28FM=s4800-w800-h600" alt="⛰️ Trolltunga" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFDH1hm6RH8BXw01RpQVXA5fgcBXcZVtrj_iA-SNyeuIeBjUP5ZSnVyCkeMipFCd4Se6nL4CMM8wVrNhECvTCcBkLW2vbsVMYADrhCwgSqf6qBQsylxWmYTT7fX6EoHvp4RgKIrf46ErjHLIY5Wq-M3FQ=s4800-w800-h600" alt="⛰️ Trolltunga" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(7)">
+<div class="inum nt">8</div>
+<div class="ibody">
+<div class="idate">Fri Aug 21</div>
+<div class="ititle">🚂 Flåmsbana → Flåm</div>
+<div class="idesc">Sleep in. Bus Odda → Myrdal. Ride Flåmsbana (1 hr, 863m descent, waterfalls, tunnels). Kayak Nærøyfjord or Stegastein viewpoint.</div>
+<div><span class="itag tt">Scenic railway #2</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNH9Up64rGYkIoi49F1GnrxwFp5gpMCeBtaLRpYFHkD7o52QFa-bMcHlHm9Ed3_b4SEiPu3xyNFQht9KLJoMUgUMsO7xI-oHtsJM48YbTSk3CdcWcCcWDx6WF6zUGmDXFv_koCwoxx1Fjz4UCw=s4800-w800-h600" alt="🚂 Flåmsbana → Flåm" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEvBx-_0xp68sf1IDkeVVTpIc319rDfS3UF39lXHlM6UXNaPlFn14b-eKXiYzOBs6STv3SiDIwoCEOe2i7_tGOdUMXMfhjg5_aUmztvETEM0bA2e9GaV-mH4iEyICwOA8VmCmc9DjmLBlZz5A=s4800-w800-h600" alt="🚂 Flåmsbana → Flåm" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFcYH_gF2dK1abErXv2xzpEEvu8r0L4bcsoC0bGijhFyaMCB_pIbHkXSR2ibUhmjXYFUuAULg-CGRGPrwCZbUvRw2BU4zrkJE4wHJyuStrnNEQvC3wGEKiBchLM16luUol1QCF8LLkHJBN6jQ=s4800-w800-h600" alt="🚂 Flåmsbana → Flåm" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEdEnxn4zOSAEvgUsvys1JKIJ146GXDJTGrhxKr67osogWwgHSAfB_WEEDbqT2nGbD3DlKjFXfuJ3wDpZHpK8klEu23sTKwm28qDdetwTLsMP3R28lIDhaMYWXLRJJcrfExIQLgaaWBymc4IQ=s4800-w800-h600" alt="🚂 Flåmsbana → Flåm" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(8)">
+<div class="inum np">9</div>
+<div class="ibody">
+<div class="idate">Sat Aug 22</div>
+<div class="ititle">Ferry Geirangerfjord → Ålesund</div>
+<div class="idesc">Morning ferry through Geirangerfjord (Seven Sisters waterfalls). Bus to Ålesund. Climb Aksla steps for panoramic sunset.</div>
+<div><span class="itag tf">Scenic transit</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFWtIo9nFSe7lYcYBMNDsdFK_KCWQnwMTnknUk6D03f4aiOzdO8RyatHgzwcN1Q1zT1Z4Hc4wa_RRWiTN0SlTZTIP3Btsh3FXMVHJHn-W73qxvGhJ1hs8-RofYkCgCzovQK91eS43qGpxL6oQ=s4800-w678-h452" alt="Ferry Geirangerfjord → Ålesund" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEMvSfYIDVHv0j42871ZqHBNoxzCVSJupWP5dGctlqcMbEAocj_S5bB6W_9IdfuHaPhctYlF0EJP600DxyGMvCsZJmeZS9Satjh0NKjyv5ZZLYnSOsEWYRy1GMI8GPw0H4t0Xp-0_ekY7OCmDc=s4800-w800-h600" alt="Ferry Geirangerfjord → Ålesund" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNEIEy77aY5-BScc-B2sORZE2PElDl0lphifLfrW9QBT6afTVI72n4GIZnEzkafrYLZobCIRDjLAb608iinql_N_3MuH9y21SXUExDM05hRZZyPyTE4_EKCxvCf14tY__8gI8P1_yu_U4_RVjg=s4800-w800-h600" alt="Ferry Geirangerfjord → Ålesund" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNH4hEQ38VWGbHe0JIbAaB8_8NG_xZSMZPVIY7AqOdDHwbunI1wYW-HH5yQBKuCy0WSnwojwGETIVpgf7P-rCv1zAAdHXzQIg72-9a-paqzjKsA2q0guFuiBY9xul0wpDopojPK9f33_YK8s-9E=s4800-w800-h600" alt="Ferry Geirangerfjord → Ålesund" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(9)">
+<div class="inum nt">10</div>
+<div class="ibody">
+<div class="idate">Sun Aug 23</div>
+<div class="ititle">🚂 Rauma + Dovre → Oslo</div>
+<div class="idesc">Early bus to Åndalsnes. Litlefjellet hike (30 min, Trollveggen views). Rauma Railway (1.5 hrs) → Dombås → Dovre Line (5 hrs) → Oslo.</div>
+<div><span class="itag tt">Scenic railways #3 + #4</span></div>
+<details class="photo-drop"><summary>📷 See photos</summary><div class="photo-scroll"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNHxFqZbGLWCenQoOHyGtuPI0CBV0YYj5srkpgOCTanvaGLPMqbxcExfdOffgP2Yq-g5H4LnHBUF4Au_QMzjVOZrFMdEnuMf-mxzAgYRsP62c3YrrrYq4i_BgI8SySeYDC3C_1kP4_fx21LbfQ=s4800-w800-h600" alt="🚂 Rauma + Dovre → Oslo" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNH0u3CXqQLanF7XXIVxAhILt0CzmbSbLEikPjmMxxWpCt8mD1pTr4v1krpSOEkvysQrMhdnBJBzyUqyC4JOQqZmZPUYJaomvcNBmpKEpjQ6QNSZYL-mR02Str7C-Ommz5BrT-X5Pu9nogx8ezI=s4800-w800-h600" alt="🚂 Rauma + Dovre → Oslo" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNFqDJDP4cuubbqhc2YRJ92FTtiepLqG0ciFj2tBOsUPjDwcxALX27ItLnA38AN-DUGiV96Co__Qee6mZxGa8Gaiq2Js3w-ZcSCP6CIboKFevrPOQpGgfDRaswvDB71jiUgzpcmyhVS5r_d1PQ=s4800-w800-h600" alt="🚂 Rauma + Dovre → Oslo" loading="lazy"><img src="https://lh3.googleusercontent.com/place-photos/AL8-SNGDGMQ-iz5hhY3iazZwsVTMpZhSEqIklEgyTrSyxdciL8S8BHiuQHHf_96_cw6s3FUxNXuqGxAmKRZHL_MfUsx0HPdKPWs_6CULtmxMHsDvWzP2fdO78dDPlIG9oXiV3aHl-OVyVtGttf-6_g=s4800-w800-h600" alt="🚂 Rauma + Dovre → Oslo" loading="lazy"></div></details>
+</div>
+</div>
+<div class="iday" onclick="flyTo(10)">
+<div class="inum nc">11</div>
+<div class="ibody">
+<div class="idate">Mon Aug 24</div>
+<div class="ititle">Fly home</div>
+<div class="idesc">OSL 9:20 AM → ORD 2:30 PM via Amsterdam. Home for dinner.</div>
+<div><span class="itag tr">Travel day</span></div>
+
+</div>
+</div>
+
+</div>
+
+<div class="sec">
+<div class="sec-t">4 scenic railways</div>
+<div class="tbox"><div class="tn">1. Bergen Railway — Day 2-3</div><div class="td">Oslo → Finse → Bergen &middot; ~7 hrs total &middot; Hardangervidda plateau, glaciers, 1,237m summit &middot; Sit LEFT</div><div style="margin-top:6px"><a href="https://www.vy.no/en/traffic-and-routes/stations-and-network-maps/the-bergen-line">Vy.no</a><a href="https://www.visitnorway.com/plan-your-trip/getting-around/by-train/the-bergen-railway/">Guide</a></div></div>
+<div class="tbox"><div class="tn">2. Flåm Railway — Day 8</div><div class="td">Myrdal → Flåm &middot; ~1 hr &middot; 863m descent, waterfalls, hairpin tunnels</div><div style="margin-top:6px"><a href="https://www.visitflam.com/flamsbana/">Visit Flåm</a><a href="https://www.vy.no/en">Vy.no</a></div></div>
+<div class="tbox"><div class="tn">3. Rauma Railway — Day 10</div><div class="td">Åndalsnes → Dombås &middot; ~1.5 hrs &middot; Trollveggen, Kylling Bridge &middot; Lonely Planet #1</div><div style="margin-top:6px"><a href="https://www.sj.no/en">SJ Nord</a><a href="https://www.visitnorway.com/plan-your-trip/getting-around/by-train/beautiful-journeys/">Guide</a></div></div>
+<div class="tbox"><div class="tn">4. Dovre Line — Day 10</div><div class="td">Dombås → Oslo &middot; ~5 hrs &middot; Gudbrandsdalen, Rondane &amp; Dovrefjell national parks</div><div style="margin-top:6px"><a href="https://www.sj.no/en">SJ Nord</a><a href="https://www.visitnorway.com/plan-your-trip/getting-around/by-train/the-dovre-line/">Guide</a></div></div>
+</div>
+
+<div class="sec">
+<div class="sec-t">What to book &amp; when</div>
+<div class="sec-s">Priority order &middot; pp = per person &middot; Accommodation shared</div>
+
+<div class="bk u"><div class="bk-h"><div class="bk-n">1. Flights</div><div class="bk-w wn">Now</div></div><div class="bk-p"><span class="pt pp">$738 pp</span><span class="pt ptot">$1,476 total</span></div><div class="bk-l"><a href="https://www.google.com/travel/flights">Google Flights</a><a href="https://www.klm.com">KLM</a></div></div>
+
+<div class="bk u"><div class="bk-h"><div class="bk-n">2. DNT Membership + Key</div><div class="bk-w wn">Now</div></div><div class="bk-d">Both sign up. Key pickup: DNT Oslo, Youngstorget 1, Day 1.</div><div class="bk-p"><span class="pt pp">~$74 pp</span><span class="pt ptot">~$148</span></div><div class="bk-l"><a href="https://www.dnt.no/en/member/">DNT Membership</a><a href="https://hyttebestilling.dnt.no/">Cabin Booking</a></div></div>
+
+<div class="bk u"><div class="bk-h"><div class="bk-n">3. Finsehytta — Aug 15</div><div class="bk-w wn">Now</div></div><div class="bk-d">Full board (dinner, bed, breakfast, packed lunch). 174 beds — August fills.</div><div class="bk-p"><span class="pt pp">~$80 pp</span><span class="pt ptot">~$160</span></div><div class="bk-l"><a href="https://hyttebestilling.dnt.no/">DNT Booking</a><a href="https://www.dnt.no/en/Cabins/betjente/finsehytta/">Info</a></div></div>
+
+<div class="bk u"><div class="bk-h"><div class="bk-n">4. Accommodation — 9 nights</div><div class="bk-w wn">Now</div></div><div class="bk-d">Double rooms, refundable.</div><div class="bk-p"><span class="pt psh">~$855 shared</span><span class="pt pp">~$428 pp</span></div>
+<div class="ng"><div class="ng-i"><span class="ng-c">Oslo</span><span class="ng-d">Aug 14 &middot; 1n</span></div><div class="ng-i"><span class="ng-c">Bergen</span><span class="ng-d">Aug 16 &middot; 1n</span></div><div class="ng-i"><span class="ng-c">Stavanger</span><span class="ng-d">Aug 17-18 &middot; 2n</span></div><div class="ng-i"><span class="ng-c">Odda</span><span class="ng-d">Aug 19-20 &middot; 2n</span></div><div class="ng-i"><span class="ng-c">Flåm</span><span class="ng-d">Aug 21 &middot; 1n</span></div><div class="ng-i"><span class="ng-c">Ålesund</span><span class="ng-d">Aug 22 &middot; 1n</span></div><div class="ng-i"><span class="ng-c">Oslo</span><span class="ng-d">Aug 23 &middot; 1n</span></div></div>
+<div class="bk-l" style="margin-top:8px"><a href="https://www.booking.com">Booking.com</a><a href="https://www.airbnb.com">Airbnb</a><a href="https://www.hostelworld.com">Hostelworld</a></div></div>
+
+<div class="bk u"><div class="bk-h"><div class="bk-n">5. Bergen Railway — 2 legs</div><div class="bk-w wm">Mid-May</div></div><div class="bk-d">Oslo→Finse (Aug 15) + Finse→Bergen (Aug 16). LEFT side.</div><div class="bk-p"><span class="pt pp">$25-65 pp/leg</span><span class="pt ptot">$100-260</span></div><div class="bk-l"><a href="https://www.vy.no/en">Vy.no</a><a href="https://www.entur.no/en">Entur</a></div></div>
+
+<div class="bk s"><div class="bk-h"><div class="bk-n">6. Flåmsbana</div><div class="bk-w wm">June</div></div><div class="bk-p"><span class="pt pp">~$40 pp</span><span class="pt ptot">~$80</span></div><div class="bk-l"><a href="https://www.visitflam.com/flamsbana/">Visit Flåm</a></div></div>
+
+<div class="bk s"><div class="bk-h"><div class="bk-n">7. Rauma + Dovre</div><div class="bk-w wm">June</div></div><div class="bk-p"><span class="pt pp">~$50 pp</span><span class="pt ptot">~$100</span></div><div class="bk-l"><a href="https://www.sj.no/en">SJ Nord</a><a href="https://www.vy.no/en">Vy.no</a><a href="https://www.entur.no/en">Entur</a></div></div>
+
+<div class="bk s"><div class="bk-h"><div class="bk-n">8. Trolltunga shuttle</div><div class="bk-w wm">July</div></div><div class="bk-p"><span class="pt pp">~$15 pp</span><span class="pt ptot">~$30</span></div><div class="bk-l"><a href="https://www.trolltunga.com">Trolltunga.com</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">9. Bergen→Stavanger bus</div><div class="bk-w wj">2 wks</div></div><div class="bk-p"><span class="pt pp">~$40 pp</span><span class="pt ptot">~$80</span></div><div class="bk-l"><a href="https://kystbussen.no">Kystbussen</a><a href="https://www.entur.no/en">Entur</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">10. Stavanger→Odda bus</div><div class="bk-w wj">2 wks</div></div><div class="bk-p"><span class="pt pp">~$38 pp</span><span class="pt ptot">~$76</span></div><div class="bk-l"><a href="https://www.nor-way.no/en">Nor-Way</a><a href="https://www.entur.no/en">Entur</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">11. Preikestolen bus</div><div class="bk-w wj">1 wk</div></div><div class="bk-p"><span class="pt pp">~$20 pp</span><span class="pt ptot">~$40</span></div><div class="bk-l"><a href="https://gofjords.com/preikestolen">GoFjords</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">12. Geiranger ferry + bus</div><div class="bk-w wj">1-2 wks</div></div><div class="bk-p"><span class="pt pp">~$55 pp</span><span class="pt ptot">~$110</span></div><div class="bk-l"><a href="https://www.fjord1.no/en">Fjord1</a><a href="https://www.norled.no/en/">Norled</a><a href="https://frframt.no">FRAM</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">13. Ålesund→Åndalsnes bus</div><div class="bk-w wj">1 wk</div></div><div class="bk-p"><span class="pt pp">~$25 pp</span><span class="pt ptot">~$50</span></div><div class="bk-l"><a href="https://frframt.no">FRAM</a><a href="https://www.entur.no/en">Entur</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">14. Kayak Nærøyfjord (optional)</div><div class="bk-w wj">1-2 wks</div></div><div class="bk-p"><span class="pt pp">~$70 pp</span><span class="pt ptot">~$140</span></div><div class="bk-l"><a href="https://www.visitflam.com">Visit Flåm</a></div></div>
+
+<div class="bk l"><div class="bk-h"><div class="bk-n">15. Insurance + eSIM</div><div class="bk-w wj">Before trip</div></div><div class="bk-p"><span class="pt pp">~$60 pp</span><span class="pt ptot">~$120</span></div><div class="bk-l"><a href="https://www.worldnomads.com">World Nomads</a><a href="https://www.safetywing.com">SafetyWing</a><a href="https://www.airalo.com">Airalo</a></div></div>
+</div>
+
+<div class="sec">
+<div class="sec-t">Budget</div>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px">
+<table class="bt">
+<thead><tr><th>Category</th><th>Per person</th><th>Total (2)</th></tr></thead>
+<tbody>
+<tr><td>✈️ Flights</td><td>$738</td><td>$1,476</td></tr>
+<tr><td>🏔️ DNT + Finse<span class="cat">Membership + full board</span></td><td>$154</td><td>$308</td></tr>
+<tr><td>🚂 Trains<span class="cat">Bergen + Flåm + Rauma + Dovre</span></td><td>$155</td><td>$310</td></tr>
+<tr><td>🚌 Buses<span class="cat">6 legs + shuttles</span></td><td>$178</td><td>$356</td></tr>
+<tr><td>⛴️ Ferries</td><td>$55</td><td>$110</td></tr>
+<tr><td>🏨 Hotels<span class="cat">9 nights shared</span></td><td>$428</td><td>$855</td></tr>
+<tr><td>🍽️ Food<span class="cat">Groceries + dinners</span></td><td>$330</td><td>$660</td></tr>
+<tr><td>🎯 Activities</td><td>$100</td><td>$200</td></tr>
+<tr><td>📦 Misc<span class="cat">Insurance, eSIM, buffer</span></td><td>$120</td><td>$240</td></tr>
+<tr class="tot"><td>Total</td><td>~$2,258 pp</td><td>~$4,515</td></tr>
+<tr class="sav"><td colspan="3">💡 Sharing rooms saves ~$430 pp vs. solo</td></tr>
+</tbody></table></div>
+</div>
+
+<div class="sec">
+<div class="sec-t">Quick links</div>
+<div class="lg">
+<a href="https://www.vy.no/en" class="lc"><div class="lc-t">Vy.no</div><div class="lc-d">Bergen + Dovre trains</div></a>
+<a href="https://www.sj.no/en" class="lc"><div class="lc-t">SJ Nord</div><div class="lc-d">Rauma Railway</div></a>
+<a href="https://www.entur.no/en" class="lc"><div class="lc-t">Entur</div><div class="lc-d">All Norway transit</div></a>
+<a href="https://www.visitflam.com/flamsbana/" class="lc"><div class="lc-t">Visit Flåm</div><div class="lc-d">Flåmsbana + activities</div></a>
+<a href="https://hyttebestilling.dnt.no/" class="lc"><div class="lc-t">DNT Booking</div><div class="lc-d">Cabin reservations</div></a>
+<a href="https://www.dnt.no/en/member/" class="lc"><div class="lc-t">DNT Membership</div><div class="lc-d">Sign up + key</div></a>
+<a href="https://www.nor-way.no/en" class="lc"><div class="lc-t">Nor-Way Bus</div><div class="lc-d">Long-distance buses</div></a>
+<a href="https://kystbussen.no" class="lc"><div class="lc-t">Kystbussen</div><div class="lc-d">Bergen↔Stavanger</div></a>
+<a href="https://www.fjord1.no/en" class="lc"><div class="lc-t">Fjord1</div><div class="lc-d">Ferry schedules</div></a>
+<a href="https://www.trolltunga.com" class="lc"><div class="lc-t">Trolltunga.com</div><div class="lc-d">Trail + shuttle</div></a>
+<a href="https://www.visitnorway.com" class="lc"><div class="lc-t">Visit Norway</div><div class="lc-d">Official tourism</div></a>
+<a href="https://frframt.no" class="lc"><div class="lc-t">FRAM</div><div class="lc-d">Ålesund / Geiranger</div></a>
+</div>
+</div>
+
+<div class="note note-w">
+<strong>⏰ Calendar reminders</strong>
+• Now — Flights ($1,476) + Finsehytta + hotels + DNT membership<br>
+• May 17 — Bergen Railway Minipris for Aug 15 → vy.no<br>
+• June — Flåmsbana, Rauma + Dovre trains<br>
+• July — Buses, ferries, Trolltunga shuttle, kayak<br>
+• Aug 1 — Verify ferry schedules, offline maps, eSIMs
+</div>
+
+<div class="note note-g" style="margin-top:10px">
+<strong>📱 Share this plan</strong>
+Upload to Google Drive. Forward all confirmation emails to a shared "Norway 2026" folder.
+</div>
+
+<div style="text-align:center;margin-top:40px;color:var(--muted);font-size:.75rem">Built with Claude &middot; March 2026</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var stops=[{name:"Arrive Oslo",lat:59.9139,lng:10.7522,day:"Day 1 & 11",desc:"Arrive / Depart. DNT office at Youngstorget.",color:"#1B5E4B"},
+{name:"Bergen Railway → Finse",lat:60.5938,lng:7.5269,day:"Day 2",desc:"Bergen Railway stop. Glacier hike. No roads.",color:"#1A5276"},
+{name:"Finse → Bergen",lat:60.3913,lng:5.3221,day:"Day 3-4",desc:"Bryggen, Fløyen funicular, Pingvinen fish soup.",color:"#1A5276"},
+{name:"Bergen AM → bus → Stavanger",lat:58.9718,lng:5.7261,day:"Day 4-5",desc:"Gamle Stavanger, Øvre Holmegate. Preikestolen hike.",color:"#5B3A8C"},
+{name:"Preikestolen (Pulpit Rock)",lat:58.9864,lng:6.1904,day:"Day 5",desc:"604m cliff. 4-5 hr hike. Start early.",color:"#C4621A"},
+{name:"Bus → Odda · Rest day",lat:60.0693,lng:6.5451,day:"Day 6-7",desc:"Rest + Buerbreen. Then Trolltunga.",color:"#5B3A8C"},
+{name:"Trolltunga",lat:60.1241,lng:6.74,day:"Day 7",desc:"20 km RT. 7-10 hrs from P3.",color:"#922B21"},
+{name:"Flåmsbana → Flåm",lat:60.8608,lng:7.1118,day:"Day 8",desc:"Flåmsbana. Kayak Nærøyfjord.",color:"#1A5276"},
+{name:"Ferry Geirangerfjord → Ålesund",lat:62.1015,lng:7.0941,day:"Day 9",desc:"Geirangerfjord ferry → Ålesund sunset.",color:"#5B3A8C"},
+{name:"Rauma + Dovre → Oslo",lat:62.5673,lng:7.6876,day:"Day 10",desc:"Litlefjellet hike. Rauma + Dovre trains to Oslo.",color:"#1A5276"},
+{name:"Fly home",lat:60.1975,lng:11.1004,day:"Day 11",desc:"Fly home from Oslo Gardermoen.",color:"#1B5E4B"}];
+var map=L.map('map',{scrollWheelZoom:false}).setView([60.8,7.5],6);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'&copy; OSM &copy; CARTO',maxZoom:18}).addTo(map);
+var coords=stops.map(function(s){return[s.lat,s.lng]});
+L.polyline(coords,{color:'#1A5276',weight:2.5,opacity:.5,dashArray:'8 6'}).addTo(map);
+var markers=[];
+stops.forEach(function(s,i){
+var m=L.circleMarker([s.lat,s.lng],{radius:7,fillColor:s.color,color:'#fff',weight:2,fillOpacity:.9}).addTo(map);
+m.bindPopup('<div class="popup-day">'+s.day+'</div><div class="popup-title">'+s.name+'</div><div class="popup-desc">'+s.desc+'</div>');
+markers.push(m);
+});
+function flyTo(i){map.flyTo([stops[i].lat,stops[i].lng],10,{duration:1.2});markers[i].openPopup();document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});}
+</script>
+</body>
+</html>
